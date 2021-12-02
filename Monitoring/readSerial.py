@@ -1,4 +1,5 @@
 import serial
+import sys
 import os
 import csv
 import keyboard
@@ -11,8 +12,14 @@ def connect_to_serial(baudrate=115200):
 
     PORT = input("Type the port you are tryig to connect to: ")
 
+    if sys.platform.startswith('linux'):
+        port = f'/dev/{PORT}'
+
+    else:
+        port = PORT
+
     while(1):
-        print(f'\n\nReading in from: {PORT}')
+        print(f'\n\nReading in from: {port}')
 
         if not is_connected(PORT):
 
@@ -24,7 +31,7 @@ def connect_to_serial(baudrate=115200):
                 return None
 
         try:
-            ser = serial.Serial(f'/dev/{PORT}', \
+            ser = serial.Serial(f'{port}', \
                                 baudrate=baudrate, \
                                 parity=serial.PARITY_NONE, \
                                 stopbits=serial.STOPBITS_ONE,\

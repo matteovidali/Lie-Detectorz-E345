@@ -54,6 +54,7 @@ def animate_stacked(i):
 
 
     axs[0].set_ylim(-0.5,1.5)
+    axs[1].set_ylim(0, 0.35)
 
 
     starting_point = len(x) - 3000
