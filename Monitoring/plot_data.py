@@ -52,6 +52,10 @@ def animate_stacked(i):
     axs[3].cla()
     axs[4].cla()
 
+
+    axs[0].set_ylim(-0.5,1.5)
+
+
     starting_point = len(x) - 3000
     axs[0].plot(x[starting_point:], ecg[starting_point:], label="ecg")
     axs[1].plot(x[starting_point:], gsr[starting_point:], label="gsr")
@@ -60,7 +64,7 @@ def animate_stacked(i):
     axs[3].plot(x[starting_point:], a_stat[starting_point:], label = "a_stat")
     axs[4].plot(x[starting_point:], q_stat[starting_point:], label = "q_stat")
     
-    fig.legend(loc="upper left")
+    fig.legend(loc="upper right")
 
     
     
