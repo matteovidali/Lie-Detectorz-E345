@@ -63,10 +63,11 @@ def read_serial(serialObj):
 
 
 def write_serial_to_csv(filename, serial_obj):
-    fieldnames = ["index", "ecg_value", "gsr_value", "q_status", "a_status"]
+    fieldnames = ["index", "ecg_value", "gsr_value", "par", "q_status", "a_status"]
     idx = 0 
     ecg = None
     gsr = None
+    par = None
     q_status = False
     a_status = False
 
@@ -79,7 +80,7 @@ def write_serial_to_csv(filename, serial_obj):
     while True:
         try:
             try:
-                ecg, gsr = read_serial(serial_obj).strip().split(',')
+                ecg, gsr, par = read_serial(serial_obj).strip().split(',')
             except AttributeError:
                 print("ecg, gsr, are not defined\n")
                 continue
@@ -90,7 +91,7 @@ def write_serial_to_csv(filename, serial_obj):
             
             q_status = 1 * keyboard.is_pressed('i')
             a_status = 1 * keyboard.is_pressed('a')
-            print(ecg, gsr, q_status, a_status)
+            print(ecg, gsr, par, q_status, a_status)
 
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
@@ -98,6 +99,7 @@ def write_serial_to_csv(filename, serial_obj):
                 "index": idx,
                 "ecg_value": ecg,
                 "gsr_value": gsr,
+                "par":par,
                 "q_status": q_status,
                 "a_status": a_status
             }
