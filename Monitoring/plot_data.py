@@ -60,8 +60,7 @@ def animate_stacked(i):
     starting_point = len(x) - 3000
     axs[0].plot(x[starting_point:], ecg[starting_point:], label="ecg")
     axs[1].plot(x[starting_point:], gsr[starting_point:], label="gsr")
-    axs[2].plot(x[starting_point:], ecg[starting_point:], label="stacked")
-    axs[2].plot(x[starting_point:], gsr[starting_point:])
+    axs[2].plot(x[starting_point:], 1-gsr[starting_point:], label="lie_prob")
     axs[3].plot(x[starting_point:], a_stat[starting_point:], label = "a_stat")
     axs[4].plot(x[starting_point:], q_stat[starting_point:], label = "q_stat")
     

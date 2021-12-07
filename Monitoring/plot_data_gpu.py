@@ -14,12 +14,12 @@ import numpy as np
 import math
 import csv
 import os
+import newSerial
 
-filename = input("type file: ")
 
 # Number of cols and rows in the table.
-nrows = 16
-ncols =  20
+nrows = 4 #16
+ncols = 1 #20 
 
 # Number of signals.
 m = nrows*ncols
@@ -28,7 +28,7 @@ m = nrows*ncols
 n = 5000
 
 # Various signal amplitudes.
-amplitudes = .1 + .2 * np.random.rand(m, 1).astype(np.float32)
+amplitudes = 0 * np.random.rand(m, 1).astype(np.float32)
 
 # Generate the signals as a (m, n) array.
 y = amplitudes * np.random.randn(m, n).astype(np.float32)
@@ -44,10 +44,6 @@ index = np.c_[np.repeat(np.repeat(np.arange(ncols), nrows), n),
               np.repeat(np.tile(np.arange(nrows), ncols), n),
               np.tile(np.arange(n), m)].astype(np.float32)
 
-file = open(filename, 'r', encoding='utf-8')
-st_results = os.stat(filename)
-st_size=st_results[6]
-file.seek(st_size)
 
 VERT_SHADER = """
 #version 120
@@ -107,8 +103,9 @@ void main() {
 """
 
 
+
 class Canvas(app.Canvas):
-    def __init__(self):
+    def __init__(self, file=None, serial=None,idx=None):
         app.Canvas.__init__(self, title='Lie Detector Data. Use your wheel to zoom!',
                             keys='interactive')
         self.program = gloo.Program(VERT_SHADER, FRAG_SHADER)
@@ -118,6 +115,9 @@ class Canvas(app.Canvas):
         self.program['u_scale'] = (1., 1.)
         self.program['u_size'] = (nrows, ncols)
         self.program['u_n'] = n
+        self.file = file
+        self.serial = serial
+        self.idx = idx
 
         gloo.set_viewport(0, 0, *self.physical_size)
 
@@ -131,6 +131,9 @@ class Canvas(app.Canvas):
     def on_resize(self, event):
         gloo.set_viewport(0, 0, *event.physical_size)
 
+    def updateIDX(self):
+        self.idx = self.idx + 1
+
     def on_mouse_wheel(self, event):
         dx = np.sign(event.delta[1]) * .05
         scale_x, scale_y = self.program['u_scale']
@@ -139,18 +142,22 @@ class Canvas(app.Canvas):
         self.program['u_scale'] = (max(1, scale_x_new), max(1, scale_y_new))
         self.update()
 
+
     def on_timer(self, event):
         """Add some data at the end of each signal (real-time signals)."""
-        where = file.tell()
-        line = file.readlines()
-        file.seek(where)
-        if line:
-            print(line)
+
+        if self.serial and self.file:
+            data = newSerial.getSerial(self.file, self.serial, self.idx)
+
         k = 1
         y[:, :-k] = y[:, k:]
-        y[:, -k:] = amplitudes * np.random.randn(m, k)
+        if data:
+            print(data)
+            y[3, -k:] = data["ecg_value"] 
+            y[2, -k:] = data["gsr_value"] 
+            y[1, -k:] = 1-data["gsr_value"]
+            self.updateIDX()
     
-        
         self.program['a_position'].set_data(y.ravel().astype(np.float32))
         self.update()
         self.context.flush()  # prevent memory leak when minimized
@@ -160,5 +167,7 @@ class Canvas(app.Canvas):
         self.program.draw('line_strip')
 
 if __name__ == '__main__':
-    c = Canvas()
+    idx = 0
+    file, serial = newSerial.setup()
+    c = Canvas(file=file, serial=serial, idx=idx)
     app.run()
